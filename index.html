@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Project: ATS Friendly CV Generator v0.1
+  Author: Mamun Hossen
+  Github: https://github.com/mamunhossen-dev
+-->
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ATS CV Forge — Build Your Perfect Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg: #0e0f12;
+  --surface: #16181d;
+  --surface-2: #1e2028;
+  --surface-3: #252830;
+  --border: rgba(255,255,255,0.07);
+  --border-2: rgba(255,255,255,0.12);
+  --accent: #e8c97e;
+  --accent-dim: rgba(232,201,126,0.15);
+  --accent-glow: rgba(232,201,126,0.4);
+  --green: #6fcf97;
+  --green-dim: rgba(111,207,151,0.15);
+  --red: #eb5757;
+  --red-dim: rgba(235,87,87,0.15);
+  --blue: #56ccf2;
+  --blue-dim: rgba(86,204,242,0.15);
+  --text: #f0f0f0;
+  --text-2: #a0a4b0;
+  --text-3: #606472;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --panel-width: 480px;
+  --transition: 0.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 56px;
+  background: rgba(14,15,18,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+}
+
+.topbar-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.topbar-logo span { color: var(--text); }
+
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-2);
+  color: var(--text-2);
+}
+.btn-ghost:hover { border-color: var(--text-3); color: var(--text); background: var(--surface-2); }
+
+.btn-accent {
+  background: var(--accent);
+  color: #0e0f12;
+  font-weight: 600;
+}
+.btn-accent:hover { background: #f0d898; box-shadow: 0 0 20px var(--accent-glow); }
+
+.btn-danger {
+  background: var(--red-dim);
+  border-color: rgba(235,87,87,0.3);
+  color: var(--red);
+}
+.btn-danger:hover { background: rgba(235,87,87,0.25); }
+
+.btn-green {
+  background: var(--green-dim);
+  border-color: rgba(111,207,151,0.3);
+  color: var(--green);
+}
+.btn-green:hover { background: rgba(111,207,151,0.25); }
+
+.btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+.btn-icon { padding: 8px; }
+
+.btn svg { flex-shrink: 0; }
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+#app {
+  display: flex;
+  margin-top: 56px;
+  min-height: calc(100vh - 56px);
+}
+
+/* ============================================================
+   EDITOR PANEL
+   ============================================================ */
+#editor-panel {
+  width: var(--panel-width);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  position: sticky;
+  top: 56px;
+}
+
+.editor-inner { padding: 20px; }
+
+/* ============================================================
+   SECTION TABS
+   ============================================================ */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  flex: 1; min-width: 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font-body);
+  font-size: 0.73rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-btn.active {
+  background: var(--surface-3);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.tab-btn:hover:not(.active) { color: var(--text-2); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ============================================================
+   SECTION CARD
+   ============================================================ */
+.section-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+  position: relative;
+  animation: slideIn 0.25s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   SKILLS TAGS
+   ============================================================ */
+.skills-container {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  min-height: 36px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  margin-bottom: 8px;
+}
+
+.skill-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(232,201,126,0.25);
+  color: var(--accent);
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-weight: 500;
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.skill-tag button {
+  background: none; border: none; cursor: pointer;
+  color: var(--accent); line-height: 1; padding: 0 1px;
+  font-size: 0.9rem; opacity: 0.7;
+  transition: opacity var(--transition);
+}
+.skill-tag button:hover { opacity: 1; }
+
+.skill-input-row { display: flex; gap: 6px; }
+.skill-input-row .form-input { flex: 1; }
+
+/* ============================================================
+   SECTION HEADING
+   ============================================================ */
+.section-heading {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-heading h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.section-heading h3 .icon {
+  width: 20px; height: 20px;
+  background: var(--accent-dim);
+  border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+}
+
+/* ============================================================
+   ATS SCORE PANEL
+   ============================================================ */
+.ats-score-ring {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 16px;
+}
+
+.score-circle {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+}
+
+.score-circle svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+
+.score-circle .score-val {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text);
+  position: relative; z-index: 1;
+  line-height: 1;
+}
+
+.score-label { font-size: 0.78rem; color: var(--text-2); font-weight: 500; }
+
+.ats-checks { display: flex; flex-direction: column; gap: 6px; }
+
+.ats-check-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+}
+
+.ats-check-item.pass {
+  background: var(--green-dim);
+  border-color: rgba(111,207,151,0.2);
+  color: var(--green);
+}
+
+.ats-check-item.fail {
+  background: var(--red-dim);
+  border-color: rgba(235,87,87,0.2);
+  color: var(--red);
+}
+
+.ats-check-item.warn {
+  background: var(--accent-dim);
+  border-color: rgba(232,201,126,0.2);
+  color: var(--accent);
+}
+
+/* ============================================================
+   KEYWORD CHECKER
+   ============================================================ */
+.keyword-results { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+.kw-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.kw-badge.found { background: var(--green-dim); color: var(--green); border: 1px solid rgba(111,207,151,0.2); }
+.kw-badge.missing { background: var(--red-dim); color: var(--red); border: 1px solid rgba(235,87,87,0.2); }
+
+.kw-group { margin-bottom: 8px; }
+.kw-group-label { font-size: 0.75rem; color: var(--text-3); margin-bottom: 4px; font-weight: 500; }
+.kw-group-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.match-bar {
+  height: 8px; background: var(--surface-3); border-radius: 99px; overflow: hidden; margin: 10px 0 4px;
+}
+.match-bar-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--green), var(--accent));
+  transition: width 0.5s ease;
+}
+.match-pct { font-size: 0.75rem; color: var(--text-2); text-align: right; margin-bottom: 10px; }
+
+/* ============================================================
+   PREVIEW PANEL
+   ============================================================ */
+#preview-panel {
+  flex: 1;
+  background: #2a2d35;
+  padding: 32px 24px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.preview-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-toolbar-title {
+  font-size: 0.82rem;
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.preview-toolbar-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ============================================================
+   A4 PAPER PREVIEW
+   ============================================================ */
+#cv-paper {
+  width: 794px;
+  min-height: 1123px;
+  background: #ffffff;
+  margin: 0 auto;
+  padding: 48px 52px;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.5);
+  position: relative;
+  color: #1a1a1a;
+  font-family: 'DM Sans', Arial, sans-serif;
+}
+
+/* CV typography */
+#cv-paper .cv-name {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+  line-height: 1.1;
+}
+
+#cv-paper .cv-title {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+#cv-paper .cv-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11.5px;
+  color: #444;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #1a1a1a;
+}
+
+#cv-paper .cv-contact span { display: flex; align-items: center; gap: 4px; }
+
+#cv-paper .cv-section { margin-bottom: 18px; }
+
+#cv-paper .cv-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 3px;
+  margin-bottom: 10px;
+}
+
+#cv-paper .cv-summary {
+  font-size: 12px;
+  color: #333;
+  line-height: 1.65;
+}
+
+#cv-paper .cv-entry { margin-bottom: 12px; }
+
+#cv-paper .cv-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 1px;
+}
+
+#cv-paper .cv-entry-org {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #111;
+}
+
+#cv-paper .cv-entry-date {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#cv-paper .cv-entry-role {
+  font-size: 12px;
+  color: #444;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+#cv-paper .cv-entry-desc {
+  font-size: 11.5px;
+  color: #333;
+  line-height: 1.6;
+}
+
+#cv-paper .cv-entry-desc ul {
+  padding-left: 16px;
+  margin: 2px 0;
+}
+#cv-paper .cv-entry-desc ul li { margin-bottom: 2px; }
+
+#cv-paper .cv-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#cv-paper .cv-skill-pill {
+  background: #f0f0f0;
+  color: #222;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+#cv-paper .cv-edu-entry { margin-bottom: 10px; }
+
+#cv-paper .cv-placeholder {
+  font-size: 12px;
+  color: #bbb;
+  font-style: italic;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-3);
+}
+.empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+.empty-state p { font-size: 0.82rem; }
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  body * { visibility: hidden; }
+  #cv-paper, #cv-paper * { visibility: visible; }
+  #cv-paper {
+    position: fixed; top: 0; left: 0;
+    width: 210mm; min-height: 297mm;
+    padding: 20mm 18mm;
+    box-shadow: none;
+    margin: 0;
+  }
+  #topbar, #editor-panel, .preview-toolbar { display: none !important; }
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+#toast-container {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.toast {
+  background: var(--surface-3);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  animation: toastIn 0.3s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast.success .toast-icon { color: var(--green); }
+.toast.error .toast-icon { color: var(--red); }
+.toast.info .toast-icon { color: var(--accent); }
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 960px) {
+  #app { flex-direction: column; }
+
+  #editor-panel {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  #preview-panel { padding: 20px 12px; }
+
+  #cv-paper {
+    width: 100%;
+    min-height: auto;
+    padding: 24px 20px;
+    font-size: 90%;
+  }
+
+  .topbar-actions .btn span { display: none; }
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .tabs { gap: 1px; }
+  .tab-btn { font-size: 0.68rem; padding: 5px 4px; }
+}
+
+/* ============================================================
+   MISC UTILS
+   ============================================================ */
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+.text-accent { color: var(--accent); }
+.text-muted { color: var(--text-3); font-size: 0.78rem; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.w-full { width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<header id="topbar">
+  <div class="topbar-logo">
+    ◈ ATS CV <span>Forge</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="clearAllData()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      <span>Clear All</span>
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="copyPlainText()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      <span>Copy Text</span>
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span>Print</span>
+    </button>
+    <button class="btn btn-accent btn-sm" onclick="exportPDF()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export PDF
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     MAIN APP
+     ============================================================ -->
+<main id="app">
+
+  <!-- ====== EDITOR PANEL ====== -->
+  <aside id="editor-panel">
+    <div class="editor-inner">
+
+      <!-- Tab Navigation -->
+      <div class="tabs" id="tabNav">
+        <button class="tab-btn active" data-tab="personal">Personal</button>
+        <button class="tab-btn" data-tab="summary">Summary</button>
+        <button class="tab-btn" data-tab="skills">Skills</button>
+        <button class="tab-btn" data-tab="experience">Experience</button>
+        <button class="tab-btn" data-tab="education">Education</button>
+        <button class="tab-btn" data-tab="extra">More</button>
+        <button class="tab-btn" data-tab="ats">ATS</button>
+      </div>
+
+      <!-- ============ TAB: PERSONAL ============ -->
+      <div class="tab-panel active" id="tab-personal">
+        <div class="section-heading">
+          <h3><span class="icon">👤</span> Personal Information</h3>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" id="firstName" placeholder="Jane" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" id="lastName" placeholder="Smith" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Professional Title</label>
+          <input class="form-input" id="jobTitle" placeholder="Senior Software Engineer" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="email" type="email" placeholder="jane@email.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" id="phone" placeholder="+1 (555) 000-0000" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input class="form-input" id="location" placeholder="New York, NY" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">LinkedIn</label>
+            <input class="form-input" id="linkedin" placeholder="linkedin.com/in/jane" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Website / Portfolio</label>
+            <input class="form-input" id="website" placeholder="janesmith.dev" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">GitHub</label>
+            <input class="form-input" id="github" placeholder="github.com/jane" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: SUMMARY ============ -->
+      <div class="tab-panel" id="tab-summary">
+        <div class="section-heading">
+          <h3><span class="icon">📝</span> Professional Summary</h3>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Summary (3–5 sentences recommended)</label>
+          <textarea class="form-textarea" id="summary" rows="6"
+            placeholder="Results-driven software engineer with 5+ years of experience building scalable web applications..."></textarea>
+        </div>
+        <p class="text-muted">💡 Tip: Use keywords from the job description here for best ATS results.</p>
+      </div>
+
+      <!-- ============ TAB: SKILLS ============ -->
+      <div class="tab-panel" id="tab-skills">
+        <div class="section-heading">
+          <h3><span class="icon">⚡</span> Skills</h3>
+        </div>
+        <div id="skillsContainer" class="skills-container"></div>
+        <div class="skill-input-row mb-3">
+          <input class="form-input" id="skillInput" placeholder="Add a skill (e.g. React, Python)" />
+          <button class="btn btn-accent btn-sm" onclick="addSkill()">Add</button>
+        </div>
+        <p class="text-muted">Press Enter or click Add. Click × on any skill to remove.</p>
+      </div>
+
+      <!-- ============ TAB: EXPERIENCE ============ -->
+      <div class="tab-panel" id="tab-experience">
+        <div class="section-heading">
+          <h3><span class="icon">💼</span> Work Experience</h3>
+          <button class="btn btn-ghost btn-sm" onclick="addExperience()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Job
+          </button>
+        </div>
+        <div id="experienceList"></div>
+      </div>
+
+      <!-- ============ TAB: EDUCATION ============ -->
+      <div class="tab-panel" id="tab-education">
+        <div class="section-heading">
+          <h3><span class="icon">🎓</span> Education</h3>
+          <button class="btn btn-ghost btn-sm" onclick="addEducation()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+        </div>
+        <div id="educationList"></div>
+      </div>
+
+      <!-- ============ TAB: MORE (CERTS / PROJECTS) ============ -->
+      <div class="tab-panel" id="tab-extra">
+        <!-- CERTIFICATIONS -->
+        <div class="section-heading">
+          <h3><span class="icon">🏆</span> Certifications</h3>
+          <button class="btn btn-ghost btn-sm" onclick="addCert()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+        </div>
+        <div id="certList"></div>
+        <div class="divider"></div>
+        <!-- PROJECTS -->
+        <div class="section-heading">
+          <h3><span class="icon">🚀</span> Projects</h3>
+          <button class="btn btn-ghost btn-sm" onclick="addProject()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+        </div>
+        <div id="projectList"></div>
+      </div>
+
+      <!-- ============ TAB: ATS ============ -->
+      <div class="tab-panel" id="tab-ats">
+        <!-- ATS Score -->
+        <div class="section-heading">
+          <h3><span class="icon">📊</span> ATS Score</h3>
+          <button class="btn btn-ghost btn-sm" onclick="calcATS()">Refresh</button>
+        </div>
+
+        <div class="ats-score-ring" id="atsScoreRing">
+          <div class="score-circle">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#252830" stroke-width="8"/>
+              <circle id="atsArc" cx="45" cy="45" r="38" fill="none"
+                stroke="#e8c97e" stroke-width="8"
+                stroke-dasharray="238.76"
+                stroke-dashoffset="238.76"
+                stroke-linecap="round"
+                style="transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease"/>
+            </svg>
+            <span class="score-val" id="atsScoreVal">0%</span>
+          </div>
+          <span class="score-label" id="atsScoreLabel">Click Refresh to analyze</span>
+        </div>
+
+        <div class="ats-checks mb-3" id="atsChecks"></div>
+
+        <div class="divider"></div>
+
+        <!-- Keyword Checker -->
+        <div class="section-heading" style="margin-top:12px">
+          <h3><span class="icon">🔍</span> Keyword Checker</h3>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paste Job Description</label>
+          <textarea class="form-textarea" id="jobDescInput" rows="5"
+            placeholder="Paste the job description here to check keyword match..."></textarea>
+        </div>
+        <button class="btn btn-accent w-full mb-3" onclick="checkKeywords()">Analyze Keywords</button>
+        <div id="keywordResults"></div>
+      </div>
+
+    </div><!-- /editor-inner -->
+  </aside>
+
+  <!-- ====== PREVIEW PANEL ====== -->
+  <section id="preview-panel">
+    <div class="preview-toolbar">
+      <span class="preview-toolbar-title">📄 Live A4 Preview</span>
+      <div class="preview-toolbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyPlainText()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Text
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="btn btn-accent btn-sm" onclick="exportPDF()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- A4 Paper -->
+    <div id="cv-paper">
+      <!-- rendered by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ============================================================
+   STATE — holds all CV data
+   ============================================================ */
+const state = {
+  personal: { firstName:'', lastName:'', jobTitle:'', email:'', phone:'', location:'', linkedin:'', website:'', github:'' },
+  summary: '',
+  skills: [],
+  experience: [],
+  education: [],
+  certs: [],
+  projects: []
+};
+
+let expIdCtr = 0, eduIdCtr = 0, certIdCtr = 0, projIdCtr = 0;
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadFromStorage();
+  bindInputs();
+  bindTabs();
+  bindSkillInput();
+  renderAll();
+  calcATS();
+});
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function bindTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+/* ============================================================
+   BIND INPUTS — personal + summary fields
+   ============================================================ */
+function bindInputs() {
+  const personalFields = ['firstName','lastName','jobTitle','email','phone','location','linkedin','website','github'];
+  personalFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      state.personal[id] = el.value;
+      saveToStorage();
+      renderPreview();
+      calcATS();
+    });
+  });
+  const summaryEl = document.getElementById('summary');
+  if (summaryEl) {
+    summaryEl.addEventListener('input', () => {
+      state.summary = summaryEl.value;
+      saveToStorage();
+      renderPreview();
+      calcATS();
+    });
+  }
+}
+
+/* ============================================================
+   SKILLS
+   ============================================================ */
+function bindSkillInput() {
+  const inp = document.getElementById('skillInput');
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addSkill(); }
+  });
+}
+
+function addSkill() {
+  const inp = document.getElementById('skillInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (state.skills.includes(val)) { showToast('Skill already added', 'info'); inp.value=''; return; }
+  state.skills.push(val);
+  inp.value = '';
+  saveToStorage(); renderSkillTags(); renderPreview(); calcATS();
+}
+
+function removeSkill(skill) {
+  state.skills = state.skills.filter(s => s !== skill);
+  saveToStorage(); renderSkillTags(); renderPreview(); calcATS();
+}
+
+function renderSkillTags() {
+  const cont = document.getElementById('skillsContainer');
+  cont.innerHTML = '';
+  state.skills.forEach(skill => {
+    const tag = document.createElement('span');
+    tag.className = 'skill-tag';
+    tag.innerHTML = `${esc(skill)} <button onclick="removeSkill('${esc(skill)}')" title="Remove">×</button>`;
+    cont.appendChild(tag);
+  });
+}
+
+/* ============================================================
+   EXPERIENCE
+   ============================================================ */
+function addExperience(data = null) {
+  const id = ++expIdCtr;
+  const entry = data || { company:'', role:'', start:'', end:'', current:false, description:'' };
+  state.experience.push({ id, ...entry });
+  renderExperienceList();
+  saveToStorage(); renderPreview();
+}
+
+function removeExperience(id) {
+  state.experience = state.experience.filter(e => e.id !== id);
+  renderExperienceList();
+  saveToStorage(); renderPreview();
+}
+
+function renderExperienceList() {
+  const list = document.getElementById('experienceList');
+  list.innerHTML = '';
+  if (!state.experience.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">💼</div><p>No experience added yet.<br>Click "Add Job" to get started.</p></div>`;
+    return;
+  }
+  state.experience.forEach(exp => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="section-card-header">
+        <span class="section-card-title">${exp.company || 'New Position'}</span>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeExperience(${exp.id})" title="Remove">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input class="form-input" value="${esc(exp.company)}" oninput="updateExp(${exp.id},'company',this.value)" placeholder="Acme Corp" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job Title</label>
+          <input class="form-input" value="${esc(exp.role)}" oninput="updateExp(${exp.id},'role',this.value)" placeholder="Software Engineer" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-input" value="${esc(exp.start)}" oninput="updateExp(${exp.id},'start',this.value)" placeholder="Jan 2022" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date</label>
+          <input class="form-input" value="${exp.current ? 'Present' : esc(exp.end)}" oninput="updateExp(${exp.id},'end',this.value)" placeholder="Dec 2024" ${exp.current?'disabled':''} />
+        </div>
+      </div>
+      <div class="form-group flex items-center gap-2 mb-2">
+        <input type="checkbox" id="curr-${exp.id}" ${exp.current?'checked':''} onchange="updateExp(${exp.id},'current',this.checked)" style="cursor:pointer" />
+        <label for="curr-${exp.id}" class="form-label" style="margin:0;cursor:pointer">Currently working here</label>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description / Achievements</label>
+        <textarea class="form-textarea" oninput="updateExp(${exp.id},'description',this.value)" placeholder="• Led development of...&#10;• Increased performance by...&#10;• Collaborated with...">${esc(exp.description)}</textarea>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateExp(id, field, value) {
+  const exp = state.experience.find(e => e.id === id);
+  if (!exp) return;
+  if (field === 'current') { exp.current = value; if (value) exp.end = 'Present'; }
+  else exp[field] = value;
+  // Update card title
+  const cards = document.querySelectorAll('#experienceList .section-card');
+  const idx = state.experience.findIndex(e => e.id === id);
+  if (cards[idx]) {
+    const title = cards[idx].querySelector('.section-card-title');
+    if (title) title.textContent = state.experience[idx].company || 'New Position';
+  }
+  saveToStorage(); renderPreview();
+}
+
+/* ============================================================
+   EDUCATION
+   ============================================================ */
+function addEducation(data = null) {
+  const id = ++eduIdCtr;
+  const entry = data || { school:'', degree:'', field:'', start:'', end:'', gpa:'' };
+  state.education.push({ id, ...entry });
+  renderEducationList();
+  saveToStorage(); renderPreview();
+}
+
+function removeEducation(id) {
+  state.education = state.education.filter(e => e.id !== id);
+  renderEducationList();
+  saveToStorage(); renderPreview();
+}
+
+function renderEducationList() {
+  const list = document.getElementById('educationList');
+  list.innerHTML = '';
+  if (!state.education.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🎓</div><p>No education added yet.</p></div>`;
+    return;
+  }
+  state.education.forEach(edu => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="section-card-header">
+        <span class="section-card-title">${edu.school || 'New School'}</span>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeEducation(${edu.id})" title="Remove">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">School / University</label>
+          <input class="form-input" value="${esc(edu.school)}" oninput="updateEdu(${edu.id},'school',this.value)" placeholder="MIT" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Degree</label>
+          <input class="form-input" value="${esc(edu.degree)}" oninput="updateEdu(${edu.id},'degree',this.value)" placeholder="B.S. Computer Science" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Year</label>
+          <input class="form-input" value="${esc(edu.start)}" oninput="updateEdu(${edu.id},'start',this.value)" placeholder="2018" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Year</label>
+          <input class="form-input" value="${esc(edu.end)}" oninput="updateEdu(${edu.id},'end',this.value)" placeholder="2022" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">GPA (optional)</label>
+        <input class="form-input" value="${esc(edu.gpa)}" oninput="updateEdu(${edu.id},'gpa',this.value)" placeholder="3.8/4.0" />
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateEdu(id, field, value) {
+  const edu = state.education.find(e => e.id === id);
+  if (!edu) return;
+  edu[field] = value;
+  const cards = document.querySelectorAll('#educationList .section-card');
+  const idx = state.education.findIndex(e => e.id === id);
+  if (cards[idx]) { const t = cards[idx].querySelector('.section-card-title'); if (t) t.textContent = edu.school || 'New School'; }
+  saveToStorage(); renderPreview();
+}
+
+/* ============================================================
+   CERTIFICATIONS
+   ============================================================ */
+function addCert(data = null) {
+  const id = ++certIdCtr;
+  const entry = data || { name:'', issuer:'', date:'' };
+  state.certs.push({ id, ...entry });
+  renderCertList();
+  saveToStorage(); renderPreview();
+}
+
+function removeCert(id) {
+  state.certs = state.certs.filter(c => c.id !== id);
+  renderCertList();
+  saveToStorage(); renderPreview();
+}
+
+function renderCertList() {
+  const list = document.getElementById('certList');
+  list.innerHTML = '';
+  if (!state.certs.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>No certifications yet.</p></div>`;
+    return;
+  }
+  state.certs.forEach(cert => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="section-card-header">
+        <span class="section-card-title">${cert.name || 'New Cert'}</span>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeCert(${cert.id})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Certification Name</label>
+          <input class="form-input" value="${esc(cert.name)}" oninput="updateCert(${cert.id},'name',this.value)" placeholder="AWS Solutions Architect" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Issuing Org</label>
+          <input class="form-input" value="${esc(cert.issuer)}" oninput="updateCert(${cert.id},'issuer',this.value)" placeholder="Amazon" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" value="${esc(cert.date)}" oninput="updateCert(${cert.id},'date',this.value)" placeholder="June 2023" />
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateCert(id, field, value) {
+  const cert = state.certs.find(c => c.id === id);
+  if (!cert) return;
+  cert[field] = value;
+  const cards = document.querySelectorAll('#certList .section-card');
+  const idx = state.certs.findIndex(c => c.id === id);
+  if (cards[idx]) { const t = cards[idx].querySelector('.section-card-title'); if (t) t.textContent = cert.name || 'New Cert'; }
+  saveToStorage(); renderPreview();
+}
+
+/* ============================================================
+   PROJECTS
+   ============================================================ */
+function addProject(data = null) {
+  const id = ++projIdCtr;
+  const entry = data || { name:'', url:'', description:'' };
+  state.projects.push({ id, ...entry });
+  renderProjectList();
+  saveToStorage(); renderPreview();
+}
+
+function removeProject(id) {
+  state.projects = state.projects.filter(p => p.id !== id);
+  renderProjectList();
+  saveToStorage(); renderPreview();
+}
+
+function renderProjectList() {
+  const list = document.getElementById('projectList');
+  list.innerHTML = '';
+  if (!state.projects.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🚀</div><p>No projects yet.</p></div>`;
+    return;
+  }
+  state.projects.forEach(proj => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="section-card-header">
+        <span class="section-card-title">${proj.name || 'New Project'}</span>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeProject(${proj.id})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input class="form-input" value="${esc(proj.name)}" oninput="updateProj(${proj.id},'name',this.value)" placeholder="Open Source CLI Tool" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL (optional)</label>
+          <input class="form-input" value="${esc(proj.url)}" oninput="updateProj(${proj.id},'url',this.value)" placeholder="github.com/..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" oninput="updateProj(${proj.id},'description',this.value)" placeholder="Built with React and Node.js...">${esc(proj.description)}</textarea>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function updateProj(id, field, value) {
+  const proj = state.projects.find(p => p.id === id);
+  if (!proj) return;
+  proj[field] = value;
+  const cards = document.querySelectorAll('#projectList .section-card');
+  const idx = state.projects.findIndex(p => p.id === id);
+  if (cards[idx]) { const t = cards[idx].querySelector('.section-card-title'); if (t) t.textContent = proj.name || 'New Project'; }
+  saveToStorage(); renderPreview();
+}
+
+/* ============================================================
+   RENDER ALL (on init)
+   ============================================================ */
+function renderAll() {
+  renderSkillTags();
+  renderExperienceList();
+  renderEducationList();
+  renderCertList();
+  renderProjectList();
+  renderPreview();
+  // Fill personal fields
+  const p = state.personal;
+  ['firstName','lastName','jobTitle','email','phone','location','linkedin','website','github'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && p[id]) el.value = p[id];
+  });
+  const sumEl = document.getElementById('summary');
+  if (sumEl) sumEl.value = state.summary || '';
+}
+
+/* ============================================================
+   RENDER PREVIEW (CV Paper)
+   ============================================================ */
+function renderPreview() {
+  const paper = document.getElementById('cv-paper');
+  const p = state.personal;
+  const fullName = [p.firstName, p.lastName].filter(Boolean).join(' ');
+  let html = '';
+
+  // ---- HEADER ----
+  if (fullName || p.jobTitle) {
+    html += `<div style="margin-bottom:18px; padding-bottom:14px; border-bottom:2px solid #1a1a1a;">`;
+    if (fullName) html += `<div class="cv-name">${esc(fullName)}</div>`;
+    if (p.jobTitle) html += `<div class="cv-title">${esc(p.jobTitle)}</div>`;
+    // contact row
+    const contacts = [];
+    if (p.email) contacts.push(`📧 ${esc(p.email)}`);
+    if (p.phone) contacts.push(`📞 ${esc(p.phone)}`);
+    if (p.location) contacts.push(`📍 ${esc(p.location)}`);
+    if (p.linkedin) contacts.push(`🔗 ${esc(p.linkedin)}`);
+    if (p.website) contacts.push(`🌐 ${esc(p.website)}`);
+    if (p.github) contacts.push(`⬡ ${esc(p.github)}`);
+    if (contacts.length) {
+      html += `<div class="cv-contact" style="margin-top:8px; margin-bottom:0; padding-bottom:0; border-bottom:none;">`;
+      contacts.forEach(c => { html += `<span>${c}</span>`; });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div style="padding:20px; text-align:center; color:#aaa; font-style:italic; font-size:13px;">Start filling the form on the left to build your CV</div>`;
+  }
+
+  // ---- SUMMARY ----
+  if (state.summary.trim()) {
+    html += `<div class="cv-section">
+      <div class="cv-section-title">Professional Summary</div>
+      <div class="cv-summary">${esc(state.summary).replace(/\n/g,'<br/>')}</div>
+    </div>`;
+  }
+
+  // ---- SKILLS ----
+  if (state.skills.length) {
+    html += `<div class="cv-section">
+      <div class="cv-section-title">Skills</div>
+      <div class="cv-skills-grid">`;
+    state.skills.forEach(s => { html += `<span class="cv-skill-pill">${esc(s)}</span>`; });
+    html += `</div></div>`;
+  }
+
+  // ---- EXPERIENCE ----
+  if (state.experience.length) {
+    html += `<div class="cv-section"><div class="cv-section-title">Work Experience</div>`;
+    state.experience.forEach(exp => {
+      html += `<div class="cv-entry">
+        <div class="cv-entry-header">
+          <span class="cv-entry-org">${esc(exp.company)}</span>
+          <span class="cv-entry-date">${esc(exp.start)}${exp.start&&(exp.end||exp.current)?' – ':''}${exp.current?'Present':esc(exp.end)}</span>
+        </div>
+        ${exp.role ? `<div class="cv-entry-role">${esc(exp.role)}</div>` : ''}
+        ${exp.description ? `<div class="cv-entry-desc">${formatDesc(exp.description)}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ---- EDUCATION ----
+  if (state.education.length) {
+    html += `<div class="cv-section"><div class="cv-section-title">Education</div>`;
+    state.education.forEach(edu => {
+      html += `<div class="cv-edu-entry">
+        <div class="cv-entry-header">
+          <span class="cv-entry-org">${esc(edu.school)}</span>
+          <span class="cv-entry-date">${esc(edu.start)}${edu.start&&edu.end?' – ':''}${esc(edu.end)}</span>
+        </div>
+        ${edu.degree ? `<div class="cv-entry-role">${esc(edu.degree)}</div>` : ''}
+        ${edu.gpa ? `<div class="cv-entry-desc">GPA: ${esc(edu.gpa)}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ---- CERTIFICATIONS ----
+  if (state.certs.length) {
+    html += `<div class="cv-section"><div class="cv-section-title">Certifications</div>`;
+    state.certs.forEach(cert => {
+      html += `<div class="cv-entry">
+        <div class="cv-entry-header">
+          <span class="cv-entry-org">${esc(cert.name)}</span>
+          <span class="cv-entry-date">${esc(cert.date)}</span>
+        </div>
+        ${cert.issuer ? `<div class="cv-entry-role">${esc(cert.issuer)}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ---- PROJECTS ----
+  if (state.projects.length) {
+    html += `<div class="cv-section"><div class="cv-section-title">Projects</div>`;
+    state.projects.forEach(proj => {
+      html += `<div class="cv-entry">
+        <div class="cv-entry-header">
+          <span class="cv-entry-org">${esc(proj.name)}</span>
+          ${proj.url ? `<span class="cv-entry-date" style="font-size:10.5px">${esc(proj.url)}</span>` : ''}
+        </div>
+        ${proj.description ? `<div class="cv-entry-desc">${formatDesc(proj.description)}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  paper.innerHTML = html;
+}
+
+/* Format description — convert bullet lines to <ul> */
+function formatDesc(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return '';
+  const hasBullets = lines.every(l => l.startsWith('•') || l.startsWith('-') || l.startsWith('*'));
+  if (hasBullets) {
+    return '<ul>' + lines.map(l => `<li>${esc(l.replace(/^[•\-\*]\s*/,''))}</li>`).join('') + '</ul>';
+  }
+  return `<p>${esc(text).replace(/\n/g,'<br/>')}</p>`;
+}
+
+/* ============================================================
+   ATS SCORE
+   ============================================================ */
+function calcATS() {
+  const checks = [];
+  const p = state.personal;
+
+  // Check presence of sections
+  const hasName = !!(p.firstName || p.lastName);
+  const hasEmail = !!p.email;
+  const hasPhone = !!p.phone;
+  const hasLocation = !!p.location;
+  const hasSummary = state.summary.trim().length > 50;
+  const hasSkills = state.skills.length >= 3;
+  const hasExp = state.experience.length > 0;
+  const hasEdu = state.education.length > 0;
+  const hasCerts = state.certs.length > 0;
+  const hasProjects = state.projects.length > 0;
+  const hasLinkedIn = !!p.linkedin;
+  const summaryLength = state.summary.trim().split(/\s+/).filter(Boolean).length;
+  const goodSummary = summaryLength >= 30 && summaryLength <= 120;
+
+  checks.push({ ok: hasName, label: hasName ? 'Full name present' : 'Missing full name', weight: 10 });
+  checks.push({ ok: hasEmail, label: hasEmail ? 'Email address present' : 'Missing email address', weight: 8 });
+  checks.push({ ok: hasPhone, label: hasPhone ? 'Phone number present' : 'Missing phone number', weight: 6 });
+  checks.push({ ok: hasLocation, label: hasLocation ? 'Location present' : 'Missing location', weight: 5 });
+  checks.push({ ok: hasSummary, label: hasSummary ? 'Professional summary (>50 chars)' : 'Summary missing or too short', weight: 12 });
+  checks.push({ ok: goodSummary, label: goodSummary ? 'Summary length is ideal (30–120 words)' : `Summary is ${summaryLength < 30 ? 'too short' : 'too long'} (aim for 30–120 words)`, weight: 5 });
+  checks.push({ ok: hasSkills, label: hasSkills ? `${state.skills.length} skills listed` : 'Add at least 3 skills', weight: 10 });
+  checks.push({ ok: hasExp, label: hasExp ? `${state.experience.length} work experience entry/entries` : 'No work experience added', weight: 20 });
+  checks.push({ ok: hasEdu, label: hasEdu ? 'Education section present' : 'No education added', weight: 12 });
+  checks.push({ ok: hasCerts, label: hasCerts ? 'Certifications listed' : 'No certifications (optional but helpful)', weight: 5 });
+  checks.push({ ok: hasLinkedIn, label: hasLinkedIn ? 'LinkedIn URL present' : 'LinkedIn URL missing', weight: 4 });
+  checks.push({ ok: hasProjects, label: hasProjects ? 'Projects section present' : 'No projects added (optional)', weight: 3 });
+
+  // Calculate score
+  const totalWeight = checks.reduce((s, c) => s + c.weight, 0);
+  const earned = checks.filter(c => c.ok).reduce((s, c) => s + c.weight, 0);
+  const pct = Math.round((earned / totalWeight) * 100);
+
+  // Update ring
+  const arc = document.getElementById('atsArc');
+  const valEl = document.getElementById('atsScoreVal');
+  const labelEl = document.getElementById('atsScoreLabel');
+  if (arc) {
+    const circumference = 238.76;
+    const offset = circumference - (pct / 100) * circumference;
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = pct >= 80 ? '#6fcf97' : pct >= 50 ? '#e8c97e' : '#eb5757';
+  }
+  if (valEl) valEl.textContent = pct + '%';
+  if (labelEl) {
+    labelEl.textContent = pct >= 80 ? 'Excellent! ATS-Ready' : pct >= 60 ? 'Good — a few improvements needed' : pct >= 40 ? 'Fair — several sections missing' : 'Needs significant work';
+  }
+
+  // Render checks
+  const checksEl = document.getElementById('atsChecks');
+  if (checksEl) {
+    checksEl.innerHTML = checks.map(c => `
+      <div class="ats-check-item ${c.ok ? 'pass' : c.weight >= 10 ? 'fail' : 'warn'}">
+        ${c.ok ? '✓' : c.weight >= 10 ? '✗' : '⚠'} ${c.label}
+      </div>
+    `).join('');
+  }
+}
+
+/* ============================================================
+   KEYWORD CHECKER
+   ============================================================ */
+function checkKeywords() {
+  const jobDesc = document.getElementById('jobDescInput').value.trim();
+  if (!jobDesc) { showToast('Please paste a job description first', 'error'); return; }
+
+  // Extract keywords from job description (filter stopwords)
+  const stopwords = new Set(['the','a','an','and','or','in','of','to','for','with','on','at','from','by','is','are','be','was','were','this','that','as','it','its','have','has','had','will','would','can','could','should','must','may','might','we','you','your','our','their','they','he','she','his','her','all','also','which','who','when','where','what','how','than','then','if','but','not','no','so','do','does','did','been','being','about','into','through','during','before','after','above','below','between','each','more','most','other','some','any','such','up','out','use','used','using','provide','ensure','work','team','years','experience','strong','ability','including','required','preferred']);
+
+  const words = jobDesc.toLowerCase().match(/\b[a-z][a-z+#.\-]{1,}\b/g) || [];
+  const freq = {};
+  words.forEach(w => {
+    if (!stopwords.has(w) && w.length > 2) freq[w] = (freq[w] || 0) + 1;
+  });
+
+  // Top keywords by frequency
+  const topKws = Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)
+    .map(([k]) => k);
+
+  // Check CV text
+  const cvText = getCVText().toLowerCase();
+
+  const found = topKws.filter(kw => cvText.includes(kw));
+  const missing = topKws.filter(kw => !cvText.includes(kw));
+  const pct = Math.round((found.length / topKws.length) * 100);
+
+  const resultsEl = document.getElementById('keywordResults');
+  resultsEl.innerHTML = `
+    <div class="match-bar"><div class="match-bar-fill" style="width:${pct}%"></div></div>
+    <div class="match-pct">${pct}% keyword match (${found.length}/${topKws.length})</div>
+    ${found.length ? `
+    <div class="kw-group">
+      <div class="kw-group-label">✅ Found in your CV (${found.length})</div>
+      <div class="kw-group-tags">${found.map(k => `<span class="kw-badge found">${esc(k)}</span>`).join('')}</div>
+    </div>` : ''}
+    ${missing.length ? `
+    <div class="kw-group">
+      <div class="kw-group-label">❌ Missing from your CV (${missing.length})</div>
+      <div class="kw-group-tags">${missing.map(k => `<span class="kw-badge missing">${esc(k)}</span>`).join('')}</div>
+    </div>` : ''}
+  `;
+  showToast(`Keyword analysis complete: ${pct}% match`, pct >= 70 ? 'success' : 'info');
+}
+
+/* Extract plain text from all CV data */
+function getCVText() {
+  const p = state.personal;
+  const parts = [
+    p.firstName, p.lastName, p.jobTitle, p.email, p.phone, p.location, p.linkedin, p.website, p.github,
+    state.summary,
+    ...state.skills,
+    ...state.experience.flatMap(e => [e.company, e.role, e.description]),
+    ...state.education.flatMap(e => [e.school, e.degree]),
+    ...state.certs.flatMap(c => [c.name, c.issuer]),
+    ...state.projects.flatMap(pr => [pr.name, pr.description])
+  ];
+  return parts.filter(Boolean).join(' ');
+}
+
+/* ============================================================
+   EXPORT PDF
+   ============================================================ */
+function exportPDF() {
+  showToast('Preparing PDF export…', 'info');
+  // Use browser print as PDF (most reliable for ATS-friendly plain text PDFs)
+  setTimeout(() => { window.print(); }, 300);
+}
+
+/* ============================================================
+   COPY PLAIN TEXT
+   ============================================================ */
+function copyPlainText() {
+  const p = state.personal;
+  const fullName = [p.firstName, p.lastName].filter(Boolean).join(' ');
+  const lines = [];
+
+  if (fullName) lines.push(fullName.toUpperCase());
+  if (p.jobTitle) lines.push(p.jobTitle);
+  const contacts = [p.email, p.phone, p.location, p.linkedin, p.website, p.github].filter(Boolean);
+  if (contacts.length) lines.push(contacts.join(' | '));
+  lines.push('');
+
+  if (state.summary.trim()) {
+    lines.push('PROFESSIONAL SUMMARY');
+    lines.push(state.summary);
+    lines.push('');
+  }
+
+  if (state.skills.length) {
+    lines.push('SKILLS');
+    lines.push(state.skills.join(' • '));
+    lines.push('');
+  }
+
+  if (state.experience.length) {
+    lines.push('WORK EXPERIENCE');
+    state.experience.forEach(exp => {
+      const dateRange = [exp.start, exp.current ? 'Present' : exp.end].filter(Boolean).join(' – ');
+      lines.push(`${exp.company} | ${exp.role} | ${dateRange}`);
+      if (exp.description) lines.push(exp.description);
+      lines.push('');
+    });
+  }
+
+  if (state.education.length) {
+    lines.push('EDUCATION');
+    state.education.forEach(edu => {
+      const yrs = [edu.start, edu.end].filter(Boolean).join(' – ');
+      lines.push(`${edu.school} | ${edu.degree} | ${yrs}`);
+      if (edu.gpa) lines.push(`GPA: ${edu.gpa}`);
+    });
+    lines.push('');
+  }
+
+  if (state.certs.length) {
+    lines.push('CERTIFICATIONS');
+    state.certs.forEach(c => lines.push(`${c.name} — ${c.issuer} (${c.date})`));
+    lines.push('');
+  }
+
+  if (state.projects.length) {
+    lines.push('PROJECTS');
+    state.projects.forEach(pr => {
+      lines.push(`${pr.name}${pr.url ? ' | ' + pr.url : ''}`);
+      if (pr.description) lines.push(pr.description);
+    });
+  }
+
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('Plain text copied to clipboard!', 'success'))
+    .catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text; el.style.position = 'fixed'; el.style.opacity = '0';
+      document.body.appendChild(el); el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('Copied!', 'success');
+    });
+}
+
+/* ============================================================
+   LOCAL STORAGE
+   ============================================================ */
+const STORAGE_KEY = 'atscv_state_v2';
+
+function saveToStorage() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.personal) Object.assign(state.personal, saved.personal);
+    if (saved.summary) state.summary = saved.summary;
+    if (Array.isArray(saved.skills)) state.skills = saved.skills;
+    if (Array.isArray(saved.experience)) {
+      saved.experience.forEach(e => {
+        const id = ++expIdCtr;
+        state.experience.push({ ...e, id });
+      });
+    }
+    if (Array.isArray(saved.education)) {
+      saved.education.forEach(e => {
+        const id = ++eduIdCtr;
+        state.education.push({ ...e, id });
+      });
+    }
+    if (Array.isArray(saved.certs)) {
+      saved.certs.forEach(c => {
+        const id = ++certIdCtr;
+        state.certs.push({ ...c, id });
+      });
+    }
+    if (Array.isArray(saved.projects)) {
+      saved.projects.forEach(pr => {
+        const id = ++projIdCtr;
+        state.projects.push({ ...pr, id });
+      });
+    }
+  } catch (e) {}
+}
+
+function clearAllData() {
+  if (!confirm('Clear all CV data? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  // Reset state
+  Object.keys(state.personal).forEach(k => state.personal[k] = '');
+  state.summary = ''; state.skills = []; state.experience = [];
+  state.education = []; state.certs = []; state.projects = [];
+  expIdCtr = eduIdCtr = certIdCtr = projIdCtr = 0;
+  renderAll(); calcATS();
+  document.getElementById('keywordResults').innerHTML = '';
+  showToast('All data cleared', 'info');
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* ============================================================
+   TOAST NOTIFICATION
+   ============================================================ */
+function showToast(msg, type = 'info') {
+  const cont = document.getElementById('toast-container');
+  const icons = { success:'✓', error:'✗', info:'ℹ' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ'}</span>${msg}`;
+  cont.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 350);
+  }, 2800);
+}
+</script>
+</body>
+</html>
