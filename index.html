@@ -974,7 +974,7 @@ function formatDesc(text) {
 }
 
 /* ============================================================
-   ATS SCORE FIX
+   ATS SCORE 
    ============================================================ */
 function calcATS() {
   const checks = []; const p = state.personal;
@@ -1024,6 +1024,57 @@ function calcATS() {
 
   const checksEl = document.getElementById('atsChecks');
   if (checksEl) checksEl.innerHTML = checks.map(c => `<div class="ats-check-item ${c.ok ? 'pass' : c.weight >= 10 ? 'fail' : 'warn'}">${c.ok ? '✓' : c.weight >= 10 ? '✗' : '⚠'} ${c.label}</div>`).join('');
+}
+
+/* ============================================================
+   KEYWORD CHECKER
+   ============================================================ */
+function checkKeywords() {
+  const jobDesc = (document.getElementById('jobDescInput').value || '').trim();
+  if (!jobDesc) { showToast('Please paste a job description first', 'error'); return; }
+
+  const stopwords = new Set([
+    'the','a','an','and','or','in','of','to','for','with','on','at','from','by','is','are','be',
+    'was','were','this','that','as','it','its','have','has','had','will','would','can','could',
+    'should','must','may','might','we','you','your','our','their','they','he','she','his','her',
+    'all','also','which','who','when','where','what','how','than','then','if','but','not','no',
+    'so','do','does','did','been','being','about','into','through','during','before','after',
+    'above','below','between','each','more','most','other','some','any','such','up','out',
+    'use','used','using','provide','ensure','work','team','years','experience','strong','ability',
+    'including','required','preferred','good','well','within','per','role','position'
+  ]);
+
+  const words = jobDesc.toLowerCase().match(/\b[a-z][a-z+#.\-]{1,}\b/g) || [];
+  const freq = {};
+  words.forEach(w => { if (!stopwords.has(w) && w.length > 2) freq[w] = (freq[w]||0) + 1; });
+
+  const topKws  = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,30).map(([k])=>k);
+  const cvText  = getCVText().toLowerCase();
+  const found   = topKws.filter(kw => cvText.includes(kw));
+  const missing = topKws.filter(kw => !cvText.includes(kw));
+  const pct     = topKws.length ? Math.round((found.length / topKws.length) * 100) : 0;
+
+  document.getElementById('keywordResults').innerHTML = `
+    <div class="match-bar"><div class="match-bar-fill" style="width:${pct}%"></div></div>
+    <div class="match-pct">${pct}% keyword match (${found.length}/${topKws.length} keywords)</div>
+    ${found.length ? `<div class="kw-group"><div class="kw-group-label">✅ Found in your CV (${found.length})</div>
+      <div class="kw-group-tags">${found.map(k=>`<span class="kw-badge found">${esc(k)}</span>`).join('')}</div></div>` : ''}
+    ${missing.length ? `<div class="kw-group"><div class="kw-group-label">❌ Missing from your CV (${missing.length})</div>
+      <div class="kw-group-tags">${missing.map(k=>`<span class="kw-badge missing">${esc(k)}</span>`).join('')}</div></div>` : ''}`;
+
+  showToast(`Keyword analysis: ${pct}% match`, pct >= 70 ? 'success' : 'info');
+}
+
+function getCVText() {
+  const p = state.personal;
+  return [
+    p.firstName, p.lastName, p.jobTitle, p.email, p.phone, p.location, p.linkedin, p.website, p.github,
+    state.summary, ...state.skills,
+    ...state.experience.flatMap(e => [e.company, e.role, e.description]),
+    ...state.education.flatMap(e => [e.school, e.degree]),
+    ...state.certs.flatMap(c => [c.name, c.issuer]),
+    ...state.projects.flatMap(pr => [pr.name, pr.description])
+  ].filter(Boolean).join(' ');
 }
 
 /* ============================================================
